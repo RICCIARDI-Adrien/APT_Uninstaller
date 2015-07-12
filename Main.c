@@ -69,7 +69,8 @@ static void UninstallPackages(void)
 //-------------------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-	char String_Command_Line[1024], *String;
+	static char String_Command_Line[PARSER_MAXIMUM_COMMAND_LINE_LENGTH]; // Avoid allocating so much space on stack
+	char *String;
 
 	// Only root can run this program
 	if (getuid() != 0)
@@ -99,7 +100,7 @@ int main(int argc, char *argv[])
 		// Store the next command line
 		String = ParserGetNextCommandLine();
 		if (String == NULL) break;
-		strcpy(String_Command_Line, String); // Keep the command line for later
+		strncpy(String_Command_Line, String, sizeof(String_Command_Line)); // Keep the command line for later
 
 		// Get the command type to show only install-related ones
 		switch (ParserIsInstallCommand())

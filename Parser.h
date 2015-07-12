@@ -8,6 +8,12 @@
 #define H_PARSER_H
 
 //-------------------------------------------------------------------------------------------------
+// Constants
+//-------------------------------------------------------------------------------------------------
+/** The maximum allowed length for a command line. */
+#define PARSER_MAXIMUM_COMMAND_LINE_LENGTH (1024 * 1024) // 1MB should be enough to store one line
+
+//-------------------------------------------------------------------------------------------------
 // Functions
 //-------------------------------------------------------------------------------------------------
 /** Open the APT log file to parse. This function must be called once prior any other parser function.

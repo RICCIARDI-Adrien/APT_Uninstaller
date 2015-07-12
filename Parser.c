@@ -7,13 +7,23 @@
 #include "Parser.h"
 
 //-------------------------------------------------------------------------------------------------
+// Private constants and macros
+//-------------------------------------------------------------------------------------------------
+/** Enable or disable the debug messages. */
+#ifdef DEBUG
+	#define Debug printf
+#else
+	#define Debug(X, ...)
+#endif
+
+//-------------------------------------------------------------------------------------------------
 // Private variables
 //-------------------------------------------------------------------------------------------------
 /** The log file. */
 static FILE *File_Log;
 
 /** The internal line buffer. */
-static char String_Line[1024 * 1024]; // 1MB should be enough to store one line
+static char String_Line[PARSER_MAXIMUM_COMMAND_LINE_LENGTH];
 
 //-------------------------------------------------------------------------------------------------
 // Public functions
@@ -42,9 +52,14 @@ char *ParserGetNextCommandLine(void)
 	{
 		// Read the next full line
 		if (fgets(String_Line, sizeof(String_Line), File_Log) == NULL) return NULL;
+		Debug("[ParserGetNextCommandLine] Read line : %s\n", String_Line);
 
 		// Bypass the initial "Commandline: " if the string was found
-		if (strncmp(String_Line, String_To_Find, Length) == 0) return &String_Line[Length];
+		if (strncmp(String_Line, String_To_Find, Length) == 0)
+		{
+			Debug("[ParserGetNextCommandLine] Command line found.\n");
+			return &String_Line[Length];
+		}
 	}
 }
 
@@ -59,12 +74,17 @@ int ParserIsInstallCommand(void)
 	for (i = 0; i < Length; i++)
 	{
 		Character = fgetc(File_Log);
+		Debug("[ParserIsInstallCommand] Read character : %c\n", Character);
 		if (Character == EOF) return -1;
 		String_Line[i] = (char) Character;
 	}
 	String_Line[Length] = 0; // Append terminating zero
 
-	if (strcmp(String_Line, String_To_Find) == 0) return 1;
+	if (strcmp(String_Line, String_To_Find) == 0)
+	{
+		Debug("[ParserIsInstallCommand] Install command found.\n");
+		return 1;
+	}
 	return 0;
 }
 

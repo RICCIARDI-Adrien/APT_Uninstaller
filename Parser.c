@@ -11,9 +11,9 @@
 //-------------------------------------------------------------------------------------------------
 /** Enable or disable the debug messages. */
 #ifdef DEBUG
-	#define Debug printf
+	#define Debug(String_Format, ...) printf("[%s:%d] " String_Format, __FUNCTION__, __LINE__, ##__VA_ARGS__)
 #else
-	#define Debug(X, ...)
+	#define Debug(String_Format, ...)
 #endif
 
 //-------------------------------------------------------------------------------------------------
@@ -52,12 +52,12 @@ char *ParserGetNextCommandLine(void)
 	{
 		// Read the next full line
 		if (fgets(String_Line, sizeof(String_Line), File_Log) == NULL) return NULL;
-		Debug("[ParserGetNextCommandLine] Read line : %s\n", String_Line);
+		Debug("Read line : %s\n", String_Line);
 
 		// Bypass the initial "Commandline: " if the string was found
 		if (strncmp(String_Line, String_To_Find, Length) == 0)
 		{
-			Debug("[ParserGetNextCommandLine] Command line found.\n");
+			Debug("Command line found.\n");
 			return &String_Line[Length];
 		}
 	}
@@ -70,11 +70,11 @@ int ParserIsInstallCommand(void)
 
 	Length = strlen(String_To_Find);
 
-	// Read the begining of the next line to find "Install: "
+	// Read the beginning of the next line to find "Install: "
 	for (i = 0; i < Length; i++)
 	{
 		Character = fgetc(File_Log);
-		Debug("[ParserIsInstallCommand] Read character : %c\n", Character);
+		Debug("Read character : %c\n", Character);
 		if (Character == EOF) return -1;
 		String_Line[i] = (char) Character;
 	}
@@ -82,7 +82,7 @@ int ParserIsInstallCommand(void)
 
 	if (strcmp(String_Line, String_To_Find) == 0)
 	{
-		Debug("[ParserIsInstallCommand] Install command found.\n");
+		Debug("Install command found.\n");
 		return 1;
 	}
 	return 0;

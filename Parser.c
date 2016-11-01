@@ -66,21 +66,23 @@ char *ParserGetNextCommandLine(void)
 int ParserIsInstallCommand(void)
 {
 	char *String_To_Find = "Install: ";
-	int i, Length, Character;
+	unsigned int Length;
 
 	Length = strlen(String_To_Find);
 
 	// Read the beginning of the next line to find "Install: "
-	for (i = 0; i < Length; i++)
+	if (fread(String_Line, 1, Length, File_Log) != Length) return -1;
+	
+	// Newer APT versions add a "Requested-By:" line before the "Install:" one, so remove this line if it is present
+	if (strncmp(String_Line, "Requested-By", Length) == 0) // Check only an amount of characters equal to "Install:"
 	{
-		Character = fgetc(File_Log);
-		Debug("Read character : %c\n", Character);
-		if (Character == EOF) return -1;
-		String_Line[i] = (char) Character;
+		Debug("Requested-By line found and removed.\n");
+		if (fgets(String_Line, sizeof(String_Line), File_Log) == NULL) return -1; // Remove the line
+		if (fread(String_Line, 1, Length, File_Log) != Length) return -1; // Read the following line beginning
 	}
-	String_Line[Length] = 0; // Append terminating zero
-
-	if (strcmp(String_Line, String_To_Find) == 0)
+	
+	// Is this an install command ?
+	if (strncmp(String_Line, String_To_Find, Length) == 0)
 	{
 		Debug("Install command found.\n");
 		return 1;

@@ -70,7 +70,7 @@ static void UninstallPackages(void)
 int main(int argc, char *argv[])
 {
 	static char String_Command_Line[PARSER_MAXIMUM_COMMAND_LINE_LENGTH]; // Avoid allocating so much space on stack
-	char *String;
+	char *Pointer_String;
 
 	// Only root can run this program
 	if (getuid() != 0)
@@ -80,14 +80,20 @@ int main(int argc, char *argv[])
 	}
 
 	// Check parameters
-	if (argc != 2)
+	if (argc > 2)
 	{
-		printf("Error : bad parameters.\nUsage : %s APT_Log_File\nAPT_Log_File must be in plain text format and not GZ compressed.\n", argv[0]);
+		printf("Usage : %s [APT_Log_File]\n"
+			"APT_Log_File must be in plain text format and not GZ compressed.\n"
+			"If no APT_Log_File is specified, /var/log/apt/history.log is used by default.\n", argv[0]);
 		return EXIT_FAILURE;
 	}
+	
+	// Select default APT log file if none was specified
+	if (argc == 1) Pointer_String = "/var/log/apt/history.log";
+	else Pointer_String = argv[1];
 
 	// Try to open the log file
-	if (ParserOpenFile(argv[1]) != 0)
+	if (ParserOpenFile(Pointer_String) != 0)
 	{
 		printf("Error : could not open the log file.\n");
 		return EXIT_FAILURE;
@@ -98,9 +104,9 @@ int main(int argc, char *argv[])
 	while (1)
 	{
 		// Store the next command line
-		String = ParserGetNextCommandLine();
-		if (String == NULL) break;
-		strncpy(String_Command_Line, String, sizeof(String_Command_Line)); // Keep the command line for later
+		Pointer_String = ParserGetNextCommandLine();
+		if (Pointer_String == NULL) break;
+		strncpy(String_Command_Line, Pointer_String, sizeof(String_Command_Line)); // Keep the command line for later
 
 		// Get the command type to show only install-related ones
 		switch (ParserIsInstallCommand())
@@ -126,4 +132,3 @@ int main(int argc, char *argv[])
 
 	return EXIT_SUCCESS;
 }
-

@@ -1,9 +1,13 @@
-all:
-	gcc -W -Wall Main.c Parser.c -o APT_Uninstaller
+CC = gcc
+CCFLAGS = -W -Wall
 
-debug:
-	gcc -W -Wall -DDEBUG Main.c Parser.c -o APT_Uninstaller
+BINARY = apt-uninstaller
+
+all:
+	$(CC) $(CCFLAGS) Main.c Parser.c -o $(BINARY)
+
+debug: CCFLAGS += -DDEBUG
+debug: all
 
 clean:
-	rm -f APT_Uninstaller
-
+	rm -f $(BINARY)
